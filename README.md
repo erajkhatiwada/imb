@@ -160,16 +160,16 @@ use Imb\IMBData;
 
 // Create data object directly
 $data = new IMBData(
-    barcodeId: '01',
-    serviceType: '234',
-    mailerId: '567094',
-    serialNum: '987654321',
-    zip: '12345'
+    '01',        // barcodeId
+    '234',       // serviceType
+    '567094',    // mailerId
+    '987654321', // serialNum
+    '12345'      // zip (optional)
 );
 
 $barcode = IMB::encode($data);
 
-// Create from array
+// Create from array (recommended)
 $data = IMBData::fromArray([
     'barcode_id' => '01',
     'service_type' => '234',
