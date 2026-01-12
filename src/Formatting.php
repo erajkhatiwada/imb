@@ -15,22 +15,22 @@ final class Formatting
     /**
      * @var array<int, int> Table mapping codeword indices to 13-bit codes
      */
-    private static array $encodeTable = [];
+    private static $encodeTable = [];
 
     /**
      * @var array<int, int> Table mapping 13-bit codes to codeword indices
      */
-    private static array $decodeTable = [];
+    private static $decodeTable = [];
 
     /**
      * @var array<int, int> Frame check sequence table
      */
-    private static array $fcsTable = [];
+    private static $fcsTable = [];
 
     /**
      * @var bool Whether tables have been initialized
      */
-    private static bool $initialized = false;
+    private static $initialized = false;
 
     /**
      * Initialize the codeword tables if not already done.
