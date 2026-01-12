@@ -23,7 +23,7 @@ final class Encoder
      * @throws ValidationException If input validation fails
      * @throws EncodingException If encoding fails
      */
-    public function encode(IMBData|array $data): string
+    public function encode($data)
     {
         if (is_array($data)) {
             $data = IMBData::fromArray($data);

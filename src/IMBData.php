@@ -12,6 +12,27 @@ namespace Imb;
  */
 final class IMBData
 {
+    /** @var string 2-digit barcode identifier (required) */
+    public $barcodeId;
+
+    /** @var string 3-digit service type (required) */
+    public $serviceType;
+
+    /** @var string 6 or 9 digit USPS mailer ID (required) */
+    public $mailerId;
+
+    /** @var string Serial number (required, length depends on mailerId) */
+    public $serialNum;
+
+    /** @var string|null 5-digit ZIP code (optional) */
+    public $zip;
+
+    /** @var string|null 4-digit ZIP+4 extension (optional) */
+    public $plus4;
+
+    /** @var string|null 2-digit delivery point (optional) */
+    public $deliveryPt;
+
     /**
      * @param string $barcodeId 2-digit barcode identifier (required)
      * @param string $serviceType 3-digit service type (required)
@@ -22,14 +43,21 @@ final class IMBData
      * @param string|null $deliveryPt 2-digit delivery point (optional)
      */
     public function __construct(
-        public string $barcodeId,
-        public string $serviceType,
-        public string $mailerId,
-        public string $serialNum,
-        public ?string $zip = null,
-        public ?string $plus4 = null,
-        public ?string $deliveryPt = null
+        $barcodeId,
+        $serviceType,
+        $mailerId,
+        $serialNum,
+        $zip = null,
+        $plus4 = null,
+        $deliveryPt = null
     ) {
+        $this->barcodeId = $barcodeId;
+        $this->serviceType = $serviceType;
+        $this->mailerId = $mailerId;
+        $this->serialNum = $serialNum;
+        $this->zip = $zip;
+        $this->plus4 = $plus4;
+        $this->deliveryPt = $deliveryPt;
     }
 
     /**
@@ -38,16 +66,16 @@ final class IMBData
      * @param array<string, string|null> $data
      * @return self
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data)
     {
         return new self(
-            barcodeId: $data['barcode_id'] ?? $data['barcodeId'] ?? '',
-            serviceType: $data['service_type'] ?? $data['serviceType'] ?? '',
-            mailerId: $data['mailer_id'] ?? $data['mailerId'] ?? '',
-            serialNum: $data['serial_num'] ?? $data['serialNum'] ?? '',
-            zip: $data['zip'] ?? null,
-            plus4: $data['plus4'] ?? null,
-            deliveryPt: $data['delivery_pt'] ?? $data['deliveryPt'] ?? null
+            $data['barcode_id'] ?? $data['barcodeId'] ?? '',
+            $data['service_type'] ?? $data['serviceType'] ?? '',
+            $data['mailer_id'] ?? $data['mailerId'] ?? '',
+            $data['serial_num'] ?? $data['serialNum'] ?? '',
+            $data['zip'] ?? null,
+            $data['plus4'] ?? null,
+            $data['delivery_pt'] ?? $data['deliveryPt'] ?? null
         );
     }
 

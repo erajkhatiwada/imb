@@ -88,7 +88,7 @@ final class IMB
      * // Returns: "ATTFAATTFTADFDATDDADAATTTTTTTTADFFFFFDFAFATTDAADATDDDTADAFFDFDTFT"
      * ```
      */
-    public static function encode(IMBData|array $data): string
+    public static function encode($data)
     {
         return self::getEncoder()->encode($data);
     }
@@ -130,12 +130,12 @@ final class IMB
      * @param IMBData|array<string, string|null> $data IMB data to validate
      * @return bool True if valid
      */
-    public static function validate(IMBData|array $data): bool
+    public static function validate($data)
     {
         try {
             self::encode($data);
             return true;
-        } catch (ValidationException) {
+        } catch (ValidationException $e) {
             return false;
         }
     }
@@ -146,12 +146,12 @@ final class IMB
      * @param string $barcode Barcode string to validate
      * @return bool True if valid
      */
-    public static function validateBarcode(string $barcode): bool
+    public static function validateBarcode($barcode)
     {
         try {
             self::decode($barcode);
             return true;
-        } catch (DecodingException) {
+        } catch (DecodingException $e) {
             return false;
         }
     }

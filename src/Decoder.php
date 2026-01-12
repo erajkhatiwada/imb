@@ -189,13 +189,13 @@ final class Decoder
         }
 
         return new IMBData(
-            barcodeId: $barcodeId,
-            serviceType: $serviceType,
-            mailerId: $mailerId,
-            serialNum: $serialNum,
-            zip: $zip,
-            plus4: $plus4,
-            deliveryPt: $deliveryPt
+            $barcodeId,
+            $serviceType,
+            $mailerId,
+            $serialNum,
+            $zip,
+            $plus4,
+            $deliveryPt
         );
     }
 

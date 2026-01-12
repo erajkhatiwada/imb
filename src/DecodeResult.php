@@ -12,6 +12,18 @@ namespace Imb;
  */
 final class DecodeResult
 {
+    /** @var IMBData The decoded IMB data */
+    public $data;
+
+    /** @var string|null Optional message (e.g., "Damaged barcode") */
+    public $message;
+
+    /** @var string|null Suggested corrected barcode string */
+    public $suggest;
+
+    /** @var array<int, bool>|null Array indicating which positions differ */
+    public $highlight;
+
     /**
      * @param IMBData $data The decoded IMB data
      * @param string|null $message Optional message (e.g., "Damaged barcode")
@@ -19,11 +31,15 @@ final class DecodeResult
      * @param array<int, bool>|null $highlight Array indicating which positions differ
      */
     public function __construct(
-        public IMBData $data,
-        public ?string $message = null,
-        public ?string $suggest = null,
-        public ?array $highlight = null
+        $data,
+        $message = null,
+        $suggest = null,
+        $highlight = null
     ) {
+        $this->data = $data;
+        $this->message = $message;
+        $this->suggest = $suggest;
+        $this->highlight = $highlight;
     }
 
     /**
@@ -31,9 +47,9 @@ final class DecodeResult
      *
      * @return bool
      */
-    public function wasDamaged(): bool
+    public function wasDamaged()
     {
-        return $this->message !== null && str_contains($this->message, 'Damaged');
+        return $this->message !== null && strpos($this->message, 'Damaged') !== false;
     }
 
     /**
