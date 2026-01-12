@@ -1,0 +1,62 @@
+{
+    "name": "erajkhatiwada/imb",
+    "description": "A lightweight PHP library for encoding and decoding USPS Intelligent Mail Barcodes (IMB)",
+    "type": "library",
+    "license": "CC0-1.0",
+    "keywords": [
+        "usps",
+        "intelligent-mail-barcode",
+        "imb",
+        "barcode",
+        "encode",
+        "decode",
+        "postal",
+        "mail"
+    ],
+    "authors": [
+        {
+            "name": "erajkhatiwada",
+            "homepage": "https://github.com/erajkhatiwada"
+        }
+    ],
+    "homepage": "https://github.com/erajkhatiwada/imb",
+    "support": {
+        "issues": "https://github.com/erajkhatiwada/imb/issues",
+        "source": "https://github.com/erajkhatiwada/imb"
+    },
+    "require": {
+        "php": "^7.4 || ^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6 || ^10.0 || ^11.0",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Imb\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Imb\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "phpstan": "phpstan analyse src tests --level=8",
+        "cs": "phpcs --standard=PSR12 src tests",
+        "cs-fix": "phpcbf --standard=PSR12 src tests",
+        "check": [
+            "@cs",
+            "@phpstan",
+            "@test"
+        ]
+    },
+    "bin": [
+        "bin/imb"
+    ],
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

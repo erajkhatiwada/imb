@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Imb;
+
+/**
+ * Barcode-to-bit permutation tables for USPS Intelligent Mail Barcode.
+ *
+ * These tables define the bit permutation used to convert between
+ * barcode characters (A, D, F, T) and the internal 13-bit codewords.
+ */
+final class BarcodeToBit
+{
+    /**
+     * Ascending bar character indices.
+     * Maps barcode position (0-64) to character index (0-9).
+     */
+    public const ASC_CHAR = [
+        4, 0, 2, 6, 3, 5, 1, 9, 8, 7, 1, 2, 0,
+        6, 4, 8, 2, 9, 5, 3, 0, 1, 3, 7, 4, 6,
+        8, 9, 2, 0, 5, 1, 9, 4, 3, 8, 6, 7, 1,
+        2, 4, 3, 9, 5, 7, 8, 3, 0, 2, 1, 4, 0,
+        9, 1, 7, 0, 2, 4, 6, 3, 7, 1, 9, 5, 8
+    ];
+
+    /**
+     * Ascending bar bit masks.
+     * Maps barcode position (0-64) to bit mask value.
+     */
+    public const ASC_BIT = [
+        8, 1, 256, 2048, 2, 4096, 256, 2048,
+        1024, 64, 16, 4096, 4, 128, 512, 64,
+        128, 512, 4, 256, 16, 1, 4096, 128,
+        1024, 512, 1, 128, 1024, 32, 128,
+        512, 64, 256, 4, 4096, 2, 16, 4, 1,
+        2, 32, 16, 64, 4096, 2, 1, 512, 16,
+        128, 32, 1024, 4, 64, 512, 2048, 4,
+        4096, 64, 128, 32, 2048, 1, 8, 4
+    ];
+
+    /**
+     * Descending bar character indices.
+     * Maps barcode position (0-64) to character index (0-9).
+     */
+    public const DESC_CHAR = [
+        7, 1, 9, 5, 8, 0, 2, 4, 6, 3, 5, 8, 9,
+        7, 3, 0, 6, 1, 7, 4, 6, 8, 9, 2, 5, 1,
+        7, 5, 4, 3, 8, 7, 6, 0, 2, 5, 4, 9, 3,
+        0, 1, 6, 8, 2, 0, 4, 5, 9, 6, 7, 5, 2,
+        6, 3, 8, 5, 1, 9, 8, 7, 4, 0, 2, 6, 3
+    ];
+
+    /**
+     * Descending bar bit masks.
+     * Maps barcode position (0-64) to bit mask value.
+     */
+    public const DESC_BIT = [
+        4, 1024, 4096, 32, 512, 2, 32, 16, 8,
+        512, 2048, 32, 1024, 2, 64, 8, 16, 2,
+        1024, 1, 4, 2048, 256, 64, 2, 4096,
+        8, 256, 64, 16, 16, 2048, 1, 64, 2,
+        512, 2048, 32, 8, 128, 8, 1024,
+        128, 2048, 256, 4, 1024, 8, 32, 256,
+        1, 8, 4096, 2048, 256, 16, 32, 2, 8,
+        1, 128, 4096, 512, 256, 1024
+    ];
+
+    /**
+     * Prevent instantiation of this utility class.
+     */
+    private function __construct()
+    {
+    }
+}

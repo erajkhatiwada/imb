@@ -1,0 +1,271 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * IMB CLI Tool
+ *
+ * Command-line interface for encoding and decoding USPS Intelligent Mail Barcodes.
+ *
+ * Usage:
+ *   imb encode --barcode-id=01 --service-type=234 --mailer-id=567094 --serial-num=987654321
+ *   imb decode ADFTATFADFADTFATDAFDATFDAFDAT...
+ *   imb --help
+ */
+
+// Find autoloader
+$autoloadPaths = [
+    __DIR__ . '/../vendor/autoload.php',        // When installed as a project
+    __DIR__ . '/../../../autoload.php',          // When installed as a dependency
+];
+
+$autoloaderFound = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require_once $autoloadPath;
+        $autoloaderFound = true;
+        break;
+    }
+}
+
+if (!$autoloaderFound) {
+    fwrite(STDERR, "Error: Could not find Composer autoloader.\n");
+    fwrite(STDERR, "Please run 'composer install' first.\n");
+    exit(1);
+}
+
+use Imb\IMB;
+use Imb\Exception\DecodingException;
+use Imb\Exception\ValidationException;
+
+/**
+ * Display help message.
+ */
+function showHelp(): void
+{
+    $help = <<<HELP
+IMB - USPS Intelligent Mail Barcode Encoder/Decoder
+
+USAGE:
+    imb <command> [options]
+    imb encode [options]
+    imb decode <barcode>
+
+COMMANDS:
+    encode      Encode data into an IMB barcode
+    decode      Decode an IMB barcode string
+    help        Show this help message
+
+ENCODE OPTIONS:
+    --barcode-id=XX       2-digit barcode identifier (required)
+    --service-type=XXX    3-digit service type (required)
+    --mailer-id=XXXXXX    6 or 9 digit mailer ID (required)
+    --serial-num=XXXXXXXXX Serial number (required, 9 or 6 digits)
+    --zip=XXXXX           5-digit ZIP code (optional)
+    --plus4=XXXX          4-digit ZIP+4 extension (optional)
+    --delivery-pt=XX      2-digit delivery point (optional)
+
+DECODE OPTIONS:
+    <barcode>             65-character barcode string (A, D, F, T)
+
+ALIASES:
+    -t, --type=encode     Shortcut for encode mode
+    -t, --type=decode     Shortcut for decode mode
+    -b, --barcode=XXX     Barcode to decode (shortcut)
+
+EXAMPLES:
+    # Encode with required fields only
+    imb encode --barcode-id=01 --service-type=234 --mailer-id=567094 --serial-num=987654321
+
+    # Encode with full routing information
+    imb encode --barcode-id=01 --service-type=234 --mailer-id=567094 --serial-num=987654321 \\
+        --zip=12345 --plus4=6789 --delivery-pt=01
+
+    # Decode a barcode
+    imb decode ADFTATFADFADTFATDAFDATFDAFDAT...
+
+    # Using shortcuts
+    imb -t decode -b ADFTATFADFADTFATDAFDATFDAFDAT...
+
+OUTPUT FORMAT:
+    Encode: Outputs the 65-character barcode string
+    Decode: Outputs JSON with the decoded fields
+
+HELP;
+    echo $help;
+}
+
+/**
+ * Parse command line arguments into an associative array.
+ *
+ * @param array<int, string> $argv
+ * @return array{command: string|null, options: array<string, string>}
+ */
+function parseArguments(array $argv): array
+{
+    $command = null;
+    $options = [];
+
+    // Remove script name
+    array_shift($argv);
+
+    foreach ($argv as $arg) {
+        // Long options with value: --key=value (allow alphanumeric and hyphens)
+        if (preg_match('/^--([a-z0-9-]+)=(.+)$/i', $arg, $matches)) {
+            $key = str_replace('-', '_', $matches[1]);
+            $options[$key] = $matches[2];
+            continue;
+        }
+
+        // Long options without value: --help
+        if (preg_match('/^--([a-z0-9-]+)$/i', $arg, $matches)) {
+            $key = str_replace('-', '_', $matches[1]);
+            $options[$key] = true;
+            continue;
+        }
+
+        // Short options: -t decode
+        if (preg_match('/^-([a-z])$/i', $arg, $matches)) {
+            $shortKey = $matches[1];
+            // Map short options to long options
+            $map = [
+                't' => 'type',
+                'b' => 'barcode',
+                'h' => 'help',
+            ];
+            if (isset($map[$shortKey])) {
+                $options[$map[$shortKey]] = true; // Will be overwritten if followed by value
+            }
+            continue;
+        }
+
+        // Positional argument
+        if ($command === null && !str_starts_with($arg, '-')) {
+            $command = strtolower($arg);
+        } elseif (isset($options['type']) && $options['type'] === true) {
+            $options['type'] = $arg;
+        } elseif (isset($options['barcode']) && $options['barcode'] === true) {
+            $options['barcode'] = $arg;
+        } else {
+            // Could be a barcode for decode
+            $options['positional'][] = $arg;
+        }
+    }
+
+    return ['command' => $command, 'options' => $options];
+}
+
+/**
+ * Encode command handler.
+ *
+ * @param array<string, mixed> $options
+ */
+function handleEncode(array $options): int
+{
+    $required = ['barcode_id', 'service_type', 'mailer_id', 'serial_num'];
+    $missing = [];
+
+    foreach ($required as $field) {
+        if (empty($options[$field])) {
+            $missing[] = '--' . str_replace('_', '-', $field);
+        }
+    }
+
+    if (!empty($missing)) {
+        fwrite(STDERR, "Error: Missing required options: " . implode(', ', $missing) . "\n");
+        fwrite(STDERR, "Run 'imb help' for usage information.\n");
+        return 1;
+    }
+
+    $data = [
+        'barcode_id' => (string) $options['barcode_id'],
+        'service_type' => (string) $options['service_type'],
+        'mailer_id' => (string) $options['mailer_id'],
+        'serial_num' => (string) $options['serial_num'],
+    ];
+
+    // Optional fields
+    if (!empty($options['zip'])) {
+        $data['zip'] = (string) $options['zip'];
+    }
+    if (!empty($options['plus4'])) {
+        $data['plus4'] = (string) $options['plus4'];
+    }
+    if (!empty($options['delivery_pt'])) {
+        $data['delivery_pt'] = (string) $options['delivery_pt'];
+    }
+
+    try {
+        $barcode = IMB::encode($data);
+        echo $barcode . "\n";
+        return 0;
+    } catch (ValidationException $e) {
+        fwrite(STDERR, "Validation Error: " . $e->getMessage() . "\n");
+        return 1;
+    }
+}
+
+/**
+ * Decode command handler.
+ *
+ * @param array<string, mixed> $options
+ */
+function handleDecode(array $options): int
+{
+    $barcode = $options['barcode'] ?? $options['positional'][0] ?? null;
+
+    if (empty($barcode) || $barcode === true) {
+        fwrite(STDERR, "Error: Barcode string is required.\n");
+        fwrite(STDERR, "Usage: imb decode <barcode>\n");
+        return 1;
+    }
+
+    try {
+        $result = IMB::decode((string) $barcode);
+        $output = $result->toArray();
+
+        echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
+        return 0;
+    } catch (DecodingException $e) {
+        fwrite(STDERR, "Decoding Error: " . $e->getMessage() . "\n");
+        return 1;
+    }
+}
+
+// Main execution
+$parsed = parseArguments($argv);
+$command = $parsed['command'];
+$options = $parsed['options'];
+
+// Handle type shortcut
+if (isset($options['type']) && is_string($options['type'])) {
+    $command = strtolower($options['type']);
+}
+
+// Handle help
+if (isset($options['help']) || $command === 'help') {
+    showHelp();
+    exit(0);
+}
+
+// No command specified
+if ($command === null) {
+    fwrite(STDERR, "Error: No command specified.\n");
+    fwrite(STDERR, "Run 'imb help' for usage information.\n");
+    exit(1);
+}
+
+// Execute command
+switch ($command) {
+    case 'encode':
+        exit(handleEncode($options));
+
+    case 'decode':
+        exit(handleDecode($options));
+
+    default:
+        fwrite(STDERR, "Error: Unknown command '$command'.\n");
+        fwrite(STDERR, "Run 'imb help' for usage information.\n");
+        exit(1);
+}
