@@ -304,7 +304,7 @@ This PHP library is a direct port of the excellent [Node.js IMB library](https:/
 
 Special thanks to:
 - **[BossRoxall](https://github.com/BossRoxall)** - Author of the original [Node.js IMB library](https://github.com/BossRoxall/imb)
-- **Bob Codes** - Original IMB algorithm implementation (released under CC0)
+- **[Bob Codes](https://bobcodes.weebly.com/imb.html)** - Original IMB algorithm implementation (released under CC0)
 - **USPS** - Intelligent Mail Barcode specification
 
 ## Contributing
