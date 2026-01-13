@@ -219,4 +219,72 @@ final class IMBDataTest extends TestCase
 
         $this->assertSame($original, $result);
     }
+
+    /** @test */
+    public function stringifyReturnsConcatenatedFieldsWithAllFields(): void
+    {
+        $data = new IMBData(
+            barcodeId: '00',
+            serviceType: '270',
+            mailerId: '103502',
+            serialNum: '017955971',
+            zip: '50310',
+            plus4: '1605',
+            deliveryPt: '15'
+        );
+
+        $result = $data->stringify();
+
+        $this->assertSame('0027010350201795597150310160515', $result);
+    }
+
+    /** @test */
+    public function stringifyReturnsConcatenatedFieldsWithoutOptionalFields(): void
+    {
+        $data = new IMBData(
+            barcodeId: '01',
+            serviceType: '234',
+            mailerId: '567094',
+            serialNum: '987654321'
+        );
+
+        $result = $data->stringify();
+
+        $this->assertSame('01234567094987654321', $result);
+    }
+
+    /** @test */
+    public function stringifyWithPartialOptionalFields(): void
+    {
+        $data = new IMBData(
+            barcodeId: '01',
+            serviceType: '234',
+            mailerId: '567094',
+            serialNum: '987654321',
+            zip: '12345'
+        );
+
+        $result = $data->stringify();
+
+        $this->assertSame('0123456709498765432112345', $result);
+    }
+
+    /** @test */
+    public function stringifyWithNineDigitMailerId(): void
+    {
+        $data = new IMBData(
+            barcodeId: '01',
+            serviceType: '234',
+            mailerId: '123456789',
+            serialNum: '012345',
+            zip: '12345',
+            plus4: '6789',
+            deliveryPt: '01'
+        );
+
+        $result = $data->stringify();
+
+        // 01 + 234 + 123456789 + 012345 + 12345 + 6789 + 01
+        $this->assertSame('0123412345678901234512345678901', $result);
+    }
 }

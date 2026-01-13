@@ -101,6 +101,37 @@ $isValid = IMB::validate([
 $isValid = IMB::validateBarcode('ADFTATFTDTADTDAFF...');
 ```
 
+### Stringify
+
+Convert IMB data to a concatenated numeric string (useful for display or comparison):
+
+```php
+<?php
+
+use Imb\IMB;
+
+// Get the raw numeric string representation
+$code = IMB::stringify([
+    'barcode_id' => '00',
+    'service_type' => '270',
+    'mailer_id' => '103502',
+    'serial_num' => '017955971',
+    'zip' => '50310',
+    'plus4' => '1605',
+    'delivery_pt' => '15',
+]);
+// Output: "0027010350201795597150310160515" (31 digits)
+
+// Without routing info (tracking only)
+$code = IMB::stringify([
+    'barcode_id' => '01',
+    'service_type' => '234',
+    'mailer_id' => '567094',
+    'serial_num' => '987654321',
+]);
+// Output: "01234567094987654321" (20 digits)
+```
+
 ## Input Fields
 
 ### Required Fields
@@ -244,6 +275,7 @@ if ($result->wasDamaged()) {
 | `decodeToArray(string $barcode): array` | Decode to array |
 | `validate(array\|IMBData $data): bool` | Validate input data |
 | `validateBarcode(string $barcode): bool` | Validate barcode string |
+| `stringify(array\|IMBData $data): string` | Convert to numeric string |
 | `createData(array $data): IMBData` | Create IMBData object |
 | `getEncoder(): Encoder` | Get encoder instance |
 | `getDecoder(): Decoder` | Get decoder instance |
@@ -259,6 +291,14 @@ if ($result->wasDamaged()) {
 | `zip` | ?string | 5-digit ZIP |
 | `plus4` | ?string | 4-digit ZIP+4 |
 | `deliveryPt` | ?string | 2-digit delivery point |
+
+| Method | Description |
+|--------|-------------|
+| `fromArray(array $data): IMBData` | Create from associative array |
+| `toArray(): array` | Convert to associative array |
+| `stringify(): string` | Convert to concatenated numeric string |
+| `getMailerIdLength(): int` | Get mailer ID length (6 or 9) |
+| `hasNineDigitMailerId(): bool` | Check if 9-digit mailer ID |
 
 ### DecodeResult
 

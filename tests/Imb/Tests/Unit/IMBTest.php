@@ -210,4 +210,72 @@ final class IMBTest extends TestCase
         $this->assertSame($originalData['plus4'], $decoded['plus4']);
         $this->assertSame($originalData['delivery_pt'], $decoded['delivery_pt']);
     }
+
+    /** @test */
+    public function stringifyWithArrayReturnsCorrectString(): void
+    {
+        $result = IMB::stringify([
+            'barcode_id' => '00',
+            'service_type' => '270',
+            'mailer_id' => '103502',
+            'serial_num' => '017955971',
+            'zip' => '50310',
+            'plus4' => '1605',
+            'delivery_pt' => '15',
+        ]);
+
+        $this->assertSame('0027010350201795597150310160515', $result);
+    }
+
+    /** @test */
+    public function stringifyWithIMBDataReturnsCorrectString(): void
+    {
+        $data = new IMBData(
+            barcodeId: '00',
+            serviceType: '270',
+            mailerId: '103502',
+            serialNum: '017955971',
+            zip: '50310',
+            plus4: '1605',
+            deliveryPt: '15'
+        );
+
+        $result = IMB::stringify($data);
+
+        $this->assertSame('0027010350201795597150310160515', $result);
+    }
+
+    /** @test */
+    public function stringifyFromDecodedBarcodeMatchesOriginal(): void
+    {
+        $originalData = [
+            'barcode_id' => '01',
+            'service_type' => '234',
+            'mailer_id' => '567094',
+            'serial_num' => '987654321',
+            'zip' => '12345',
+            'plus4' => '6789',
+            'delivery_pt' => '01',
+        ];
+
+        $barcode = IMB::encode($originalData);
+        $decoded = IMB::decode($barcode);
+        $stringified = $decoded->data->stringify();
+
+        // 01 + 234 + 567094 + 987654321 + 12345 + 6789 + 01
+        $this->assertSame('0123456709498765432112345678901', $stringified);
+    }
+
+    /** @test */
+    public function stringifyWithoutOptionalFieldsReturnsCorrectString(): void
+    {
+        $result = IMB::stringify([
+            'barcode_id' => '01',
+            'service_type' => '234',
+            'mailer_id' => '567094',
+            'serial_num' => '987654321',
+        ]);
+
+        $this->assertSame('01234567094987654321', $result);
+    }
 }
