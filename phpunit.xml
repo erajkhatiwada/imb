@@ -9,10 +9,10 @@
          failOnWarning="true">
     <testsuites>
         <testsuite name="Unit">
-            <directory suffix="Test.php">./tests/Unit</directory>
+            <directory suffix="Test.php">./tests/Imb/Tests/Unit</directory>
         </testsuite>
         <testsuite name="Integration">
-            <directory suffix="Test.php">./tests/Integration</directory>
+            <directory suffix="Test.php">./tests/Imb/Tests/Integration</directory>
         </testsuite>
     </testsuites>
 
