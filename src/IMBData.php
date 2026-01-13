@@ -127,4 +127,23 @@ final class IMBData
     {
         return strlen($this->mailerId) === 9;
     }
+
+    /**
+     * Convert to a concatenated string of all field values.
+     *
+     * Returns the raw numeric string representation of the IMB data,
+     * e.g., "0027010350201795597150310160515"
+     *
+     * @return string
+     */
+    public function stringify(): string
+    {
+        return $this->barcodeId
+            . $this->serviceType
+            . $this->mailerId
+            . $this->serialNum
+            . ($this->zip ?? '')
+            . ($this->plus4 ?? '')
+            . ($this->deliveryPt ?? '');
+    }
 }

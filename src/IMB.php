@@ -166,4 +166,35 @@ final class IMB
     {
         return IMBData::fromArray($data);
     }
+
+    /**
+     * Convert IMB data to a concatenated string of all field values.
+     *
+     * Returns the raw numeric string representation of the IMB data,
+     * e.g., "0027010350201795597150310160515"
+     *
+     * @param IMBData|array<string, string|null> $data IMB data to stringify
+     * @return string
+     *
+     * @example
+     * ```php
+     * $code = IMB::stringify([
+     *     'barcode_id' => '00',
+     *     'service_type' => '270',
+     *     'mailer_id' => '103502',
+     *     'serial_num' => '017955971',
+     *     'zip' => '50310',
+     *     'plus4' => '1605',
+     *     'delivery_pt' => '15',
+     * ]);
+     * // Returns: "0027010350201795597150310160515"
+     * ```
+     */
+    public static function stringify($data): string
+    {
+        if (is_array($data)) {
+            $data = IMBData::fromArray($data);
+        }
+        return $data->stringify();
+    }
 }
